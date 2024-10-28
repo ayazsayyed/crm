@@ -1,0 +1,25 @@
+/* client/src/styles.css */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .page-container {
+    padding: 20px;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .error-message {
+    color: #f44336;
+    margin: 16px 0;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #ffebee;
+  }
