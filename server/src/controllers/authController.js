@@ -69,6 +69,7 @@ const authController = {
                 'SELECT * FROM users WHERE email = ?',
                 [email]
             );
+            
 
             if (users.length === 0) {
                 return res.status(401).json({
@@ -80,7 +81,7 @@ const authController = {
 
             // Check password
             const isValidPassword = await bcrypt.compare(password, user.password);
-
+            console.log('email, password ', password, user.password);
             if (!isValidPassword) {
                 return res.status(401).json({
                     message: 'Invalid credentials'

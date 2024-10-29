@@ -21,6 +21,11 @@ import {
     MenuItem,
     Alert,
     InputAdornment,
+    Card,
+    CardContent,
+    Grid,
+    Tooltip,
+    Fade,
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -30,17 +35,27 @@ import {
     Business as BusinessIcon,
     Phone as PhoneIcon,
     Email as EmailIcon,
+    ArrowUpward as ArrowUpwardIcon,
+    ArrowDownward as ArrowDownwardIcon,
 } from '@mui/icons-material';
 import axios from '../utils/axios';
+import { useNavigate } from 'react-router-dom';
 
 const Clients = () => {
     const [clients, setClients] = useState([]);
     const [open, setOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const navigate = useNavigate();
+
+    
+    const handleRowClick = (clientId) => {
+        navigate(`/clients/${clientId}`);
+    };
     const [formData, setFormData] = useState({
         company_name: '',
         contact_person: '',
@@ -122,76 +137,169 @@ const Clients = () => {
         }
     };
 
-    const filteredClients = clients.filter(client =>
-        client.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.contact_person.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // const filteredClients = clients.filter(client =>
+    //     client.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //     client.contact_person.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+
+    const filteredClients = clients.filter(client => {
+        const matchesSearch = (
+            client.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.contact_person?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        const matchesStatus = filterStatus === 'all' || client.status === filterStatus;
+        
+        return matchesSearch && matchesStatus;
+    });
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <Typography variant="h4">Clients</Typography>
+        <Box sx={{ p: 3, maxWidth: 1200, margin: '0 auto' }}>
+            <Box 
+                sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    mb: 4 
+                }}
+            >
+                <Typography 
+                    variant="h4" 
+                    sx={{ 
+                        fontWeight: 600,
+                        color: 'primary.main' 
+                    }}
+                >
+                    Clients
+                </Typography>
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
                     onClick={() => handleOpen()}
+                    sx={{
+                        px: 3,
+                        py: 1,
+                        backgroundColor: 'primary.main',
+                        '&:hover': {
+                            backgroundColor: 'primary.dark',
+                        },
+                    }}
                 >
                     Add Client
                 </Button>
             </Box>
 
-            {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
-                </Alert>
-            )}
+            {/* Stats Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Total Clients
+                            </Typography>
+                            <Typography variant="h4">
+                                {clients.length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Active Clients
+                            </Typography>
+                            <Typography variant="h4">
+                                {clients.filter(c => c.status === 'active').length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Inactive Clients
+                            </Typography>
+                            <Typography variant="h4">
+                                {clients.filter(c => c.status === 'inactive').length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
 
-            <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Search clients..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                sx={{ mb: 3 }}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon />
-                        </InputAdornment>
-                    ),
-                }}
-            />
+            {/* Search and Filter Section */}
+            <Card sx={{ mb: 4 }}>
+                <CardContent>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            placeholder="Search clients..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <TextField
+                            select
+                            variant="outlined"
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            sx={{ minWidth: 150 }}
+                        >
+                            <MenuItem value="all">All Status</MenuItem>
+                            <MenuItem value="active">Active</MenuItem>
+                            <MenuItem value="inactive">Inactive</MenuItem>
+                        </TextField>
+                    </Box>
+                </CardContent>
+            </Card>
 
-            <TableContainer component={Paper}>
+            {/* Clients Table */}
+            <TableContainer component={Paper} sx={{ mb: 4 }}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Company Name</TableCell>
+                            <TableCell>Company</TableCell>
                             <TableCell>Contact Person</TableCell>
                             <TableCell>Contact Info</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Actions</TableCell>
+                            <TableCell align="right">Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {filteredClients.map((client) => (
-                            <TableRow key={client.id}>
+                            <TableRow 
+                                key={client.id}
+                                onClick={() => handleRowClick(client.id)}
+                                sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+                            >
                                 <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <BusinessIcon color="action" />
-                                        {client.company_name}
+                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                            {client.company_name}
+                                        </Typography>
                                     </Box>
                                 </TableCell>
                                 <TableCell>{client.contact_person}</TableCell>
                                 <TableCell>
-                                    <Box sx={{ display: 'flex', gap: 2 }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <EmailIcon fontSize="small" color="action" />
-                                            {client.email}
+                                            <Typography variant="body2">{client.email}</Typography>
                                         </Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <PhoneIcon fontSize="small" color="action" />
-                                            {client.phone}
+                                            <Typography variant="body2">{client.phone}</Typography>
                                         </Box>
                                     </Box>
                                 </TableCell>
@@ -200,15 +308,31 @@ const Clients = () => {
                                         label={client.status}
                                         color={client.status === 'active' ? 'success' : 'default'}
                                         size="small"
+                                        sx={{ 
+                                            borderRadius: 1,
+                                            textTransform: 'capitalize'
+                                        }}
                                     />
                                 </TableCell>
-                                <TableCell>
-                                    <IconButton onClick={() => handleOpen(client)}>
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton onClick={() => handleDelete(client.id)}>
-                                        <DeleteIcon />
-                                    </IconButton>
+                                <TableCell align="right">
+                                    <Tooltip title="Edit">
+                                        <IconButton 
+                                            size="small" 
+                                            onClick={() => handleOpen(client)}
+                                            sx={{ mr: 1 }}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Delete">
+                                        <IconButton 
+                                            size="small" 
+                                            onClick={() => handleDelete(client.id)}
+                                            color="error"
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         ))}

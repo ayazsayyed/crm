@@ -13,6 +13,7 @@ import Clients from './pages/Clients';
 import Projects from './pages/Projects';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ClientDetails from './pages/ClientDetails';
 
 const App = () => {
   return (
@@ -46,6 +47,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <Clients />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/clients/:id" 
+            element={
+              <ProtectedRoute>
+                <ClientDetails />
               </ProtectedRoute>
             } 
           />

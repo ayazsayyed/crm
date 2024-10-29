@@ -27,7 +27,7 @@ const Layout = () => {
           backgroundColor: (theme) => theme.palette.background.default,
         }}
       >
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Container maxWidth="lg" sx={{ mt: 10, mb: 4 }}>
           <Outlet />
         </Container>
       </Box>

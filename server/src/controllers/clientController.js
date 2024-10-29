@@ -117,6 +117,88 @@ const clientController = {
             console.error('Error deleting client:', error);
             res.status(500).json({ message: 'Error deleting client' });
         }
+    },
+    // Get single client with details
+    async getClient(req, res) {
+        try {
+            const [rows] = await pool.query(
+                'SELECT * FROM clients WHERE id = ?',
+                [req.params.id]
+            );
+            
+            if (rows.length === 0) {
+                return res.status(404).json({ message: 'Client not found' });
+            }
+
+            res.json(rows[0]);
+        } catch (error) {
+            console.error('Error fetching client:', error);
+            res.status(500).json({ message: 'Error fetching client details' });
+        }
+    },
+
+    // Get client contacts
+    async getClientContacts(req, res) {
+        try {
+            const [rows] = await pool.query(
+                `SELECT * FROM client_contacts 
+                WHERE client_id = ? 
+                ORDER BY contact_date DESC`,
+                [req.params.id]
+            );
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching contacts:', error);
+            res.status(500).json({ message: 'Error fetching contacts' });
+        }
+    },
+
+    // Get client projects
+    async getClientProjects(req, res) {
+        try {
+            const [rows] = await pool.query(
+                `SELECT * FROM client_projects 
+                WHERE client_id = ? 
+                ORDER BY created_at DESC`,
+                [req.params.id]
+            );
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+            res.status(500).json({ message: 'Error fetching projects' });
+        }
+    },
+
+    // Get client documents
+    async getClientDocuments(req, res) {
+        try {
+            const [rows] = await pool.query(
+                `SELECT * FROM client_documents 
+                WHERE client_id = ? 
+                ORDER BY uploaded_at DESC`,
+                [req.params.id]
+            );
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching documents:', error);
+            res.status(500).json({ message: 'Error fetching documents' });
+        }
+    },
+
+    // Get client notes
+    async getClientNotes(req, res) {
+        try {
+            const [rows] = await pool.query(
+                `SELECT * FROM client_notes 
+                WHERE client_id = ? 
+                ORDER BY created_at DESC`,
+                [req.params.id]
+            );
+            res.json(rows);
+        } catch (error) {
+            console.error('Error fetching notes:', error);
+            res.status(500).json({ message: 'Error fetching notes' });
+        }
     }
 };
 
