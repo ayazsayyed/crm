@@ -8,6 +8,7 @@ CREATE TABLE client_documents (
     file_size INT,
     uploaded_by INT,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comments VARCHAR(255),
     FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );

@@ -70,6 +70,8 @@ const Register = () => {
       });
       navigate('/dashboard');
     } catch (err) {
+      console.log('err ', err);
+      
       setError(err.response?.data?.message || 'Failed to register');
     } finally {
       setLoading(false);

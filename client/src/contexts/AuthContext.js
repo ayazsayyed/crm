@@ -347,7 +347,39 @@ export const AuthProvider = ({ children }) => {
 
         initializeAuth();
     }, []);
+  // Register function
+  const register = async (userData) => {
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await axios.post('/auth/register', userData);
+      const { token, user } = response.data;
 
+      // Set auth token in axios defaults
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      // Store auth data
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      setState({
+        user,
+        loading: false,
+        error: null,
+        isAuthenticated: true,
+      });
+
+      return response.data;
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: error.response?.data?.message || 'Registration failed',
+        isAuthenticated: false,
+      }));
+      throw error;
+    }
+  };
     const login = async (credentials) => {
         try {
             const response = await axios.post('/auth/login', credentials);
@@ -394,7 +426,8 @@ export const AuthProvider = ({ children }) => {
             error: state.error,
             isAuthenticated: state.isAuthenticated,
             login,
-            logout
+            logout,
+            register
         }}>
             {children}
         </AuthContext.Provider>
