@@ -1,9 +1,9 @@
-# CRM (Customer Relationship Management) System
+# Acme CRM (Customer Relationship Management) System
 
 A modern, full-stack CRM system built with React, Material-UI, Node.js, and MySQL. This system helps manage clients, projects, and team collaboration efficiently.
 
 ## Table of Contents
-- [CRM (Customer Relationship Management) System](#crm-customer-relationship-management-system)
+- [Acme CRM (Customer Relationship Management) System](#acme-crm-customer-relationship-management-system)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
     - [Authentication \& Authorization](#authentication--authorization)
@@ -105,5 +105,6 @@ Before you begin, ensure you have the following installed:
 
 1. Clone the repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/ayazsayyed/crm.git
 cd crm-project
+```
