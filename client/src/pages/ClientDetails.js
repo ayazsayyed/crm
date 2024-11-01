@@ -260,10 +260,10 @@ const ClientDetails = () => {
                             <Card sx={{ flex: 1 }}>
                                 <CardContent>
                                     <Typography color="textSecondary">
-                                        Total Contacts
+                                        Completed Projects
                                     </Typography>
                                     <Typography variant="h4">
-                                        {contacts.length}
+                                        {projects.filter(p => p.status === 'completed').length}
                                     </Typography>
                                 </CardContent>
                             </Card>

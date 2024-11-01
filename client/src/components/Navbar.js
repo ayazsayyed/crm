@@ -36,7 +36,7 @@ const Navbar = () => {
     <AppBar position="fixed">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          CRM System
+          ACME CRM SYSTEM
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

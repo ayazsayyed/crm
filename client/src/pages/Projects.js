@@ -1,180 +1,262 @@
-// client/src/pages/Projects.js
-import React, { useState } from 'react';
+// src/pages/Projects.js
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Button,
-  IconButton,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    Typography,
+    Button,
+    TextField,
+    MenuItem,
+    LinearProgress,
+    Chip,
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    InputAdornment,
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
+    Add as AddIcon,
+    Search as SearchIcon,
+    ArrowForward as ArrowForwardIcon,
+    Schedule as ScheduleIcon,
+    AttachMoney as MoneyIcon,
+    Person as PersonIcon,
 } from '@mui/icons-material';
+import axios from '../utils/axios';
 
 const Projects = () => {
-  const [projects, setProjects] = useState([
-    { 
-      id: 1, 
-      name: 'Website Redesign', 
-      client: 'ABC Corp', 
-      status: 'In Progress',
-      deadline: '2023-07-30',
-      budget: 15000 
-    },
-    { 
-      id: 2, 
-      name: 'Mobile App Development', 
-      client: 'XYZ Ltd', 
-      status: 'Planning',
-      deadline: '2023-08-15',
-      budget: 25000 
-    },
-  ]);
+    const navigate = useNavigate();
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+    useEffect(() => {
+        fetchProjects();
+    }, []);
 
-  const handleAddClick = () => {
-    setSelectedProject(null);
-    setOpenDialog(true);
-  };
+    const fetchProjects = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/projects');
+            setProjects(response.data);
+            setError('');
+        } catch (err) {
+            setError('Failed to fetch projects');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleEditClick = (project) => {
-    setSelectedProject(project);
-    setOpenDialog(true);
-  };
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'planned': return 'info';
+            case 'in_progress': return 'warning';
+            case 'completed': return 'success';
+            case 'on_hold': return 'error';
+            default: return 'default';
+        }
+    };
 
-  const handleDeleteClick = (projectId) => {
-    setProjects(projects.filter(p => p.id !== projectId));
-  };
+    const getPriorityColor = (priority) => {
+        switch (priority) {
+            case 'high': return 'error';
+            case 'medium': return 'warning';
+            case 'low': return 'success';
+            default: return 'default';
+        }
+    };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Planning': return 'info';
-      case 'In Progress': return 'warning';
-      case 'Completed': return 'success';
-      default: return 'default';
-    }
-  };
+    const filteredProjects = projects.filter(project => {
+        const matchesSearch = 
+            project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            project.client_name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
-  return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4">Projects</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddClick}
-        >
-          New Project
-        </Button>
-      </Box>
+    return (
+        <Box sx={{ p: 3 }}>
+            {/* Header */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
+                <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    Projects
+                </Typography>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate('/projects/new')}
+                >
+                    New Project
+                </Button>
+            </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Project Name</TableCell>
-              <TableCell>Client</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Deadline</TableCell>
-              <TableCell>Budget</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {projects.map((project) => (
-              <TableRow key={project.id}>
-                <TableCell>{project.name}</TableCell>
-                <TableCell>{project.client}</TableCell>
-                <TableCell>
-                  <Chip 
-                    label={project.status} 
-                    color={getStatusColor(project.status)}
+            {/* Stats Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Total Projects
+                            </Typography>
+                            <Typography variant="h4">
+                                {projects.length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                In Progress
+                            </Typography>
+                            <Typography variant="h4">
+                                {projects.filter(p => p.status === 'in_progress').length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Completed
+                            </Typography>
+                            <Typography variant="h4">
+                                {projects.filter(p => p.status === 'completed').length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                On Hold
+                            </Typography>
+                            <Typography variant="h4">
+                                {projects.filter(p => p.status === 'on_hold').length}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+
+            {/* Filters */}
+            <Box sx={{ mb: 4, display: 'flex', gap: 2 }}>
+                <TextField
                     size="small"
-                  />
-                </TableCell>
-                <TableCell>{project.deadline}</TableCell>
-                <TableCell>${project.budget.toLocaleString()}</TableCell>
-                <TableCell>
-                  <IconButton 
-                    size="small" 
-                    onClick={() => handleEditClick(project)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={() => handleDeleteClick(project.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{ width: 300 }}
+                />
+                <TextField
+                    select
+                    size="small"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    sx={{ width: 150 }}
+                >
+                    <MenuItem value="all">All Status</MenuItem>
+                    <MenuItem value="planned">Planned</MenuItem>
+                    <MenuItem value="in_progress">In Progress</MenuItem>
+                    <MenuItem value="completed">Completed</MenuItem>
+                    <MenuItem value="on_hold">On Hold</MenuItem>
+                </TextField>
+            </Box>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>
-          {selectedProject ? 'Edit Project' : 'New Project'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Project Name"
-              fullWidth
-              defaultValue={selectedProject?.name}
-            />
-            <TextField
-              label="Client"
-              fullWidth
-              defaultValue={selectedProject?.client}
-            />
-            <TextField
-              label="Status"
-              fullWidth
-              defaultValue={selectedProject?.status}
-            />
-            <TextField
-              label="Deadline"
-              type="date"
-              fullWidth
-              defaultValue={selectedProject?.deadline}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Budget"
-              type="number"
-              fullWidth
-              defaultValue={selectedProject?.budget}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setOpenDialog(false)}>
-            {selectedProject ? 'Save Changes' : 'Create Project'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
+            {/* Projects Table */}
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Project Name</TableCell>
+                            <TableCell>Client</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell>Priority</TableCell>
+                            <TableCell>Progress</TableCell>
+                            <TableCell>Due Date</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredProjects.map((project) => (
+                            <TableRow 
+                                key={project.id}
+                                sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+                            >
+                                <TableCell>
+                                    <Typography variant="subtitle2">
+                                        {project.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {project.description}
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>{project.client_name}</TableCell>
+                                <TableCell>
+                                    <Chip 
+                                        label={project.status}
+                                        color={getStatusColor(project.status)}
+                                        size="small"
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Chip 
+                                        label={project.priority}
+                                        color={getPriorityColor(project.priority)}
+                                        size="small"
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <LinearProgress 
+                                            variant="determinate" 
+                                            value={project.progress} 
+                                            sx={{ width: 100 }}
+                                        />
+                                        <Typography variant="body2">
+                                            {project.progress}%
+                                        </Typography>
+                                    </Box>
+                                </TableCell>
+                                <TableCell>
+                                    {new Date(project.end_date).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell>
+                                    <IconButton 
+                                        size="small"
+                                        onClick={() => navigate(`/projects/${project.id}`)}
+                                    >
+                                        <ArrowForwardIcon />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
+    );
 };
 
 export default Projects;

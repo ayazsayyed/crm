@@ -14,6 +14,7 @@ import Projects from './pages/Projects';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ClientDetails from './pages/ClientDetails';
+import ProjectForm from './components/ProjectForm';
 
 const App = () => {
   return (
@@ -65,6 +66,22 @@ const App = () => {
                 <Projects />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+              path="/projects/new" 
+              element={
+                  <ProtectedRoute>
+                      <ProjectForm />
+                  </ProtectedRoute>
+              } 
+          />
+          <Route 
+              path="/projects/:id" 
+              element={
+                  <ProtectedRoute>
+                      <ProjectForm />
+                  </ProtectedRoute>
+              } 
           />
         </Route>
       </Routes>
